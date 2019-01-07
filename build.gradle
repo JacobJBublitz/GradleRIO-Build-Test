@@ -1,0 +1,52 @@
+plugins {
+    id 'edu.wpi.first.GradleRIO' version '2019.1.1'
+    id 'java'
+}
+
+sourceCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+
+    // These are needed for the `jar` task to find all the required dependencies
+    maven {
+        url = 'http://first.wpi.edu/FRC/roborio/maven/release/'
+    }
+
+    maven {
+        url = 'http://devsite.ctr-electronics.com/maven/release/'
+    }
+
+    maven {
+        url = 'https://www.kauailabs.com/maven2/'
+    }
+}
+
+deploy {
+    targets {
+        roboRIO('roborio') {
+            team = frc.getTeamOrDefault(2910)
+        }
+    }
+    artifacts {
+        frcJavaArtifact('frcJava') {
+            targets << 'roborio'
+
+            debug = frc.getDebugOrDefault(false)
+        }
+    }
+}
+
+dependencies {
+    compile project(':lib')
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest('test.Main')
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = '5.0'
+}
